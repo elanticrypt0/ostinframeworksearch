@@ -1,0 +1,16 @@
+---
+const { sideBarActiveItemID } = Astro.props;
+import { Icon } from 'astro-icon/components'
+const activeClass = "bg-base-300"; // For primary color replace with `active` class
+---
+
+<ul class="menu grow shrink menu-md overflow-y-auto">
+    <li><a class="py-3 text-base" id="home" href="/">Inicio</a></li>
+    <li><a class="py-3 text-base" id="about" href="/about"><span class="text-accent font-semibold">Humalware</span></a></li>
+    <li><a class="py-3 text-base" href="https://osintframework.com/" target="_blank">OSINT FRAMEWORK <Icon fill="#fff" name="external"></Icon></a></li>
+</ul>
+
+<script define:vars={{ sideBarActiveItemID: sideBarActiveItemID, activeClass: activeClass }}>
+const activeItemElem = document.getElementById(sideBarActiveItemID);
+activeItemElem && activeItemElem.classList.add(activeClass);
+</script>
