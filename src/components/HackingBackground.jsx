@@ -4,11 +4,19 @@ const CyberpunkBackground = () => {
   const canvasRef = useRef(null);
   const frameRef = useRef(null);
 
+  // Controles de velocidad
+  const SPEED_CONFIG = {
+    DROP_SPEED: 0.15,        // Velocidad de caída de los caracteres (menor = más lento)
+    GLOW_SPEED: 0.5,        // Velocidad del efecto de resplandor
+    SCANLINE_SPEED: 50,     // Velocidad de las líneas de escaneo
+    GLITCH_PROBABILITY: 0.015, // Probabilidad de glitch (menor = menos frecuente)
+    RESET_PROBABILITY: 0.99  // Probabilidad de que una gota se reinicie (mayor = más lento)
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    // Ajustar el canvas al tamaño de la ventana
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -17,7 +25,6 @@ const CyberpunkBackground = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Caracteres para la matriz
     const katakana = "アカサタナハマヤャラワガザダバパイキシチニヒミリヰギジヂビピウクスツヌフムユュルグズブヅプエケセテネヘメレヱゲゼデベペオコソトノホモヨョロヲゴゾドボポヴッン";
     const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const nums = "0123456789";
@@ -26,16 +33,14 @@ const CyberpunkBackground = () => {
     const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     
-    // Arrays para las gotas
     const drops = new Array(columns).fill(0);
     const glowDrops = new Array(Math.floor(columns / 3)).fill(0).map(() => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      speed: 1 + Math.random() * 2,
+      speed: SPEED_CONFIG.DROP_SPEED * (1 + Math.random()),
       intensity: Math.random()
     }));
 
-    // Colores del tema
     const colors = {
       primary: '#a277ff',
       secondary: '#61ffca',
@@ -43,12 +48,10 @@ const CyberpunkBackground = () => {
       info: '#82e2ff'
     };
 
-    // Dibujar la rejilla
     function drawGrid() {
       ctx.strokeStyle = 'rgba(162, 119, 255, 0.1)';
       ctx.lineWidth = 0.5;
 
-      // Líneas verticales
       for(let x = 0; x < canvas.width; x += 30) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -56,7 +59,6 @@ const CyberpunkBackground = () => {
         ctx.stroke();
       }
 
-      // Líneas horizontales
       for(let y = 0; y < canvas.height; y += 30) {
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -65,16 +67,14 @@ const CyberpunkBackground = () => {
       }
     }
 
-    // Efecto de scanline
     function drawScanline(timestamp) {
-      const scanlinePos = (timestamp / 30) % canvas.height;
+      const scanlinePos = (timestamp / (1000 / SPEED_CONFIG.SCANLINE_SPEED)) % canvas.height;
       ctx.fillStyle = 'rgba(162, 119, 255, 0.1)';
       ctx.fillRect(0, scanlinePos, canvas.width, 2);
     }
 
-    // Efecto de glitch
     function applyGlitch() {
-      if (Math.random() < 0.01) { // 1% de probabilidad de glitch
+      if (Math.random() < SPEED_CONFIG.GLITCH_PROBABILITY) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
         const width = Math.random() * 100;
@@ -92,39 +92,33 @@ const CyberpunkBackground = () => {
       }
     }
 
-    // Dibujar los caracteres
     function drawMatrix(timestamp) {
       ctx.fillStyle = 'rgba(15, 15, 15, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Dibujar la matriz principal
       ctx.font = `${fontSize}px monospace`;
       
       drops.forEach((drop, i) => {
-        // Color principal para los caracteres
         const char = alphabet[Math.floor(Math.random() * alphabet.length)];
         const x = i * fontSize;
         const y = drop * fontSize;
 
-        // Efecto de resplandor
-        const glow = Math.sin(timestamp / 1000 + i) * 0.5 + 0.5;
+        const glow = Math.sin((timestamp / 1000) * SPEED_CONFIG.GLOW_SPEED + i) * 0.5 + 0.5;
         ctx.fillStyle = colors.primary;
         ctx.globalAlpha = glow * 0.5 + 0.5;
         
         ctx.fillText(char, x, y);
         ctx.globalAlpha = 1;
 
-        // Actualizar posición
-        if (y > canvas.height && Math.random() > 0.975) {
+        if (y > canvas.height && Math.random() > SPEED_CONFIG.RESET_PROBABILITY) {
           drops[i] = 0;
         } else {
-          drops[i]++;
+          drops[i] += SPEED_CONFIG.DROP_SPEED;
         }
       });
 
-      // Dibujar gotas con resplandor
       glowDrops.forEach(drop => {
-        const glow = Math.sin(timestamp / 1000 + drop.x) * 0.5 + 0.5;
+        const glow = Math.sin((timestamp / 1000) * SPEED_CONFIG.GLOW_SPEED + drop.x) * 0.5 + 0.5;
         ctx.fillStyle = colors.secondary;
         ctx.globalAlpha = glow * 0.3;
         
@@ -144,7 +138,6 @@ const CyberpunkBackground = () => {
       ctx.globalAlpha = 1;
     }
 
-    // Función principal de animación
     function animate(timestamp) {
       drawMatrix(timestamp);
       drawGrid();
@@ -155,7 +148,6 @@ const CyberpunkBackground = () => {
 
     frameRef.current = requestAnimationFrame(animate);
 
-    // Limpieza
     return () => {
       cancelAnimationFrame(frameRef.current);
       window.removeEventListener('resize', resize);
