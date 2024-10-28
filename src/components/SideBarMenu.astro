@@ -4,10 +4,11 @@ import { Icon } from 'astro-icon/components'
 const activeClass = "bg-base-300"; // For primary color replace with `active` class
 ---
 
-<ul class="menu grow shrink menu-md overflow-y-auto">
-    <li><a class="py-3 text-base" id="home" href="/">Inicio</a></li>
-    <li><a class="py-3 text-base" id="about" href="/about"><span class="text-accent font-semibold">Humalware</span></a></li>
-    <li><a class="py-3 text-base" href="https://osintframework.com/" target="_blank">OSINT FRAMEWORK <Icon fill="#fff" name="external"></Icon></a></li>
+<ul class="menu grow shrink menu-md overflow-y-auto gap-2">
+    <li><a class="py-3 text-neon-red hover:bg-neon-green hover:text-neutral" id="home" href="/">Buscador</a></li>
+    <!-- <li><a class="py-3 text-neon-red" id="ownframework" href="/ownframework">Framework Propio<Icon name="argentina"></Icon></a></li> -->
+    <li><a class="py-3 text-neon-red hover:bg-neon-green hover:text-neutral" id="about" href="/about">Humalware</a></li>
+    <li><a class="py-3 text-neon-red hover:bg-neon-green hover:text-neutral visited:text-neon-red" href="https://osintframework.com/" target="_blank">OSINT FRAMEWORK <Icon fill="#fff" name="external"></Icon></a></li>
 </ul>
 
 <script define:vars={{ sideBarActiveItemID: sideBarActiveItemID, activeClass: activeClass }}>
